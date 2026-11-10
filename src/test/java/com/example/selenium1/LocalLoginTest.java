@@ -1,16 +1,14 @@
 package com.example.selenium1;
-import java.io.File;
+import java.net.URL;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
+import org.openqa.selenium.chrome.ChromeOptions;
 
 public class LocalLoginTest {
 
@@ -19,40 +17,39 @@ public class LocalLoginTest {
     @BeforeMethod
     public void setUp() {
 
-        ChromeOptions options = new ChromeOptions();
+    	ChromeOptions options = new ChromeOptions();
+    	options.addArguments("--headless=new");
+    	options.addArguments("--no-sandbox");
+    	options.addArguments("--disable-dev-shm-usage");
 
-        options.addArguments("--headless=new");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        
-        String chromeBinary = System.getenv("CHROME_BIN");
-
-        if (chromeBinary != null && !chromeBinary.isBlank()) {
-            options.setBinary(chromeBinary);
-        }
-
-        driver = new ChromeDriver(options);
+    	driver = new ChromeDriver(options);
 
         driver.manage().window().maximize();
 
-        String page = new File("webpage/login.html")
-                .getAbsoluteFile()
-                .toURI()
-                .toString();
+        URL resource = getClass().getClassLoader()
+                .getResource("webpage/login.html");
 
-        driver.get(page);
+        if (resource == null) {
+            throw new IllegalArgumentException(
+                    "File not found in resources!");
+        }
+
+        driver.get(resource.toString());
     }
 
     @Test
     public void validLoginTest() {
 
-        driver.findElement(By.id("username")).sendKeys("student");
+        driver.findElement(By.id("username"))
+                .sendKeys("student");
 
-        driver.findElement(By.id("password")).sendKeys("12345");
+        driver.findElement(By.id("password"))
+                .sendKeys("12345");
 
         driver.findElement(By.id("loginButton")).click();
 
-        String message = driver.findElement(By.id("message")).getText();
+        String message =
+                driver.findElement(By.id("message")).getText();
 
         System.out.println("Message: " + message);
 
@@ -62,28 +59,34 @@ public class LocalLoginTest {
     @Test
     public void invalidLoginTest() {
 
-        driver.findElement(By.id("username")).sendKeys("wrong");
+        driver.findElement(By.id("username"))
+                .sendKeys("wrong");
 
-        driver.findElement(By.id("password")).sendKeys("wrong");
+        driver.findElement(By.id("password"))
+                .sendKeys("wrong");
 
         driver.findElement(By.id("loginButton")).click();
 
-        String message = driver.findElement(By.id("message")).getText();
+        String message =
+                driver.findElement(By.id("message")).getText();
 
         System.out.println("Message: " + message);
 
-        Assert.assertEquals(message, "Invalid Username or Password");
+        Assert.assertEquals(message,
+                "Invalid Username or Password");
     }
 
     @Test
     public void checkBackgroundColor() {
 
-        String bgColor = driver.findElement(By.id("loginBox"))
-                .getCssValue("background-color");
+        String bgColor =
+                driver.findElement(By.id("loginBox"))
+                        .getCssValue("background-color");
 
         System.out.println("Background Color: " + bgColor);
 
-        Assert.assertEquals(bgColor, "rgba(173, 216, 230, 1)");
+        Assert.assertEquals(bgColor,
+                "rgba(173, 216, 230, 1)");
     }
 
     @AfterMethod
